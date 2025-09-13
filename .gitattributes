@@ -1,0 +1,19 @@
+# Enforce LF for all text files
+* text=auto eol=lf
+
+# Windows users can still edit normally, Git will normalize to LF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Keep binary files untouched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
