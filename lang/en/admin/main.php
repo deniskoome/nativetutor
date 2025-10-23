@@ -1387,6 +1387,7 @@ By enabling this feature, newly registered users will require approval using thi
 'gateway_payu' => 'Payu',
 'gateway_paytm' => 'Paytm',
 'gateway_paystack' => 'Paystack',
+'gateway_mpesa' => 'M-Pesa',
 'notification_installments' => 'Installments',
 'notification_reminder_installments_before_overdue' => 'Installment Payment Reminder (Before Due Date)',
 'notification_reminder_installments_after_overdue' => 'Installment Payment Reminder (After Due Date)',
