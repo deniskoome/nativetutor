@@ -1332,6 +1332,7 @@ return [
     'gateway_payu' => 'Payu',
     'gateway_paytm' => 'Paytm',
     'gateway_paystack' => 'Paystack',
+    'gateway_mpesa' => 'M-Pesa',
     'notification_installments' => 'أقساط',
     'notification_reminder_installments_before_overdue' => 'تذكير بدفع القسط (قبل تاريخ الاستحقاق)',
     'notification_reminder_installments_after_overdue' => 'تذكير بدفع القسط (بعد تاريخ الاستحقاق)',

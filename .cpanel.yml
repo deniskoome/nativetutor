@@ -1,20 +1,8 @@
 ---
 deployment:
   tasks:
-    # Set Composer home
-    - export COMPOSER_HOME=$HOME/.composer
-
-    # Install dependencies without dev packages and optimize autoloader
-    - composer install --no-dev --optimize-autoloader
-
-    # Cache Laravel configuration
-    - php artisan config:cache
-
-    # Cache routes
-    - php artisan route:cache
-
-    # Cache views
-    - php artisan view:cache
-
-    # Optional: Run database migrations (uncomment if needed)
-    # - php artisan migrate --force
+    - export COMPOSER_HOME="$HOME/.composer"
+    - /usr/local/bin/composer install --no-dev --prefer-dist --working-dir=$HOME/nativetutor.com
+    - php $HOME/nativetutor.com/artisan config:cache
+    - php $HOME/nativetutor.com/artisan route:cache
+    - php $HOME/nativetutor.com/artisan view:cache

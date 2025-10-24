@@ -11,11 +11,11 @@ class PaymentChannel extends Model
     public $timestamps = false;
 
     static $classes = [
-        'Paypal', 'Payu', 'Razorpay'
+        'Paypal', 'Payu', 'Razorpay', 'Mpesa'
     ];
 
     static $gatewayIgnoreRedirect = [
-        'Paypal', 'Payu', 'Razorpay'
+        'Paypal', 'Payu', 'Razorpay', 'Mpesa'
     ];
 
     static $paypal = 'Paypal';
