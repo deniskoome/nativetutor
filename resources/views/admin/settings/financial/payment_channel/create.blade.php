@@ -79,23 +79,33 @@
                                                 <h5 class="mb-2">{{ trans('update.channel_credentials') }}</h5>
 
                                                 @foreach($credentialItems as $credentialKey => $credentialItem)
+                                                    @php
+                                                        $channelName = !empty($paymentChannel) ? $paymentChannel->class_name : null;
+                                                        $fieldName = is_array($credentialItem) ? $credentialKey : (is_numeric($credentialKey) ? $credentialItem : $credentialKey);
+                                                        $translationKey = $channelName ? 'update.channel_credential_' . \Illuminate\Support\Str::snake($channelName) . '_' . \Illuminate\Support\Str::snake($fieldName) : null;
+                                                        $label = ($translationKey && \Illuminate\Support\Facades\Lang::has($translationKey))
+                                                            ? trans($translationKey)
+                                                            : (is_array($credentialItem) ? $credentialKey : ucwords(str_replace(['_', '.'], ' ', \Illuminate\Support\Str::snake($fieldName))));
+                                                        $storedValue = (!empty($paymentChannel) and !empty($paymentChannel->credentials) and isset($paymentChannel->credentials[$fieldName])) ? $paymentChannel->credentials[$fieldName] : '';
+                                                    @endphp
+
                                                     @if(is_array($credentialItem))
                                                         <div class="form-group">
-                                                            <label>{{ $credentialKey }}</label>
-                                                            <select name="credentials[{{ $credentialKey }}]" class="form-control">
+                                                            <label>{{ $label }}</label>
+                                                            <select name="credentials[{{ $fieldName }}]" class="form-control">
                                                                 <option value="">{{ trans('update.select_a_option') }}</option>
 
                                                                 @foreach($credentialItem as $cItem)
-                                                                    <option value="{{ $cItem }}" {{ (!empty($paymentChannel) and !empty($paymentChannel->credentials) and !empty($paymentChannel->credentials[$credentialKey]) and $paymentChannel->credentials[$credentialKey] == $cItem) ? 'selected' : '' }}>{{ $cItem }}</option>
+                                                                    <option value="{{ $cItem }}" {{ ($storedValue == $cItem) ? 'selected' : '' }}>{{ $cItem }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
                                                     @else
                                                         <div class="form-group">
-                                                            <label>{{ $credentialItem }}</label>
-                                                            <input type="text" name="credentials[{{ $credentialItem }}]"
+                                                            <label>{{ $label }}</label>
+                                                            <input type="text" name="credentials[{{ $fieldName }}]"
                                                                    class="form-control"
-                                                                   value="{{ (!empty($paymentChannel) and !empty($paymentChannel->credentials) and !empty($paymentChannel->credentials[$credentialItem])) ? $paymentChannel->credentials[$credentialItem] : '' }}"/>
+                                                                   value="{{ $storedValue }}"/>
                                                         </div>
                                                     @endif
                                                 @endforeach

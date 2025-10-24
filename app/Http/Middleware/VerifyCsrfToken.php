@@ -21,5 +21,6 @@ class VerifyCsrfToken extends Middleware
         '/payments/verify/TapPayment',
         '/payments/verify/Paytr',
         '/payments/verify/Paytabs',
+        '/payments/verify/Mpesa',
     ];
 }

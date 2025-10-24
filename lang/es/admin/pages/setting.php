@@ -75,6 +75,7 @@ return [
     'gateway_payu' => 'Payu',
     'gateway_paytm' => 'Paytm',
     'gateway_paystack' => 'Paystack',
+    'gateway_mpesa' => 'M-Pesa',
 
     'main_home_hero' => 'Home hero section',
     'main_home_hero2' => 'Home hero section 2',

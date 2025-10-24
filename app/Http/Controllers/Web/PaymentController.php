@@ -118,7 +118,11 @@ class PaymentController extends Controller
             $channelManager = ChannelManager::makeChannel($paymentChannel);
             $order = $channelManager->verify($request);
 
-            return $this->paymentOrderAfterVerify($order);
+            if ($order instanceof \Illuminate\Http\Response || $order instanceof \Illuminate\Http\JsonResponse) {
+                return $order;
+            }
+
+            return $this->paymentOrderAfterVerify($order, $request);
 
         } catch (\Exception $exception) {
             $toastData = [
@@ -146,7 +150,11 @@ class PaymentController extends Controller
 
             $order = $channelManager->verify($request);
 
-            return $this->paymentOrderAfterVerify($order);
+            if ($order instanceof \Illuminate\Http\Response || $order instanceof \Illuminate\Http\JsonResponse) {
+                return $order;
+            }
+
+            return $this->paymentOrderAfterVerify($order, $request);
 
         } catch (\Exception $exception) {
             $toastData = [
@@ -158,7 +166,7 @@ class PaymentController extends Controller
         }
     }
 
-    private function paymentOrderAfterVerify($order)
+    private function paymentOrderAfterVerify($order, Request $request)
     {
         if (!empty($order)) {
 
@@ -180,6 +188,23 @@ class PaymentController extends Controller
                 }
             }
 
+            $expectsJson = $request->expectsJson() || $request->isJson() || $request->ajax();
+
+            if ($expectsJson) {
+                $responseData = [
+                    'order_id' => $order->id,
+                    'status' => $order->status,
+                    'redirect' => url('/payments/status'),
+                    'paid' => $order->status === Order::$paid,
+                ];
+
+                if ($order->status === Order::$fail) {
+                    $responseData['message'] = trans('cart.fail_purchase');
+                }
+
+                return response()->json($responseData);
+            }
+
             session()->put($this->order_session_key, $order->id);
 
             return redirect('/payments/status');
@@ -189,6 +214,13 @@ class PaymentController extends Controller
                 'msg' => trans('cart.gateway_error'),
                 'status' => 'error'
             ];
+
+            if ($request->expectsJson() || $request->isJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => Order::$fail,
+                    'message' => trans('cart.gateway_error'),
+                ], 422);
+            }
 
             return redirect('cart')->with($toastData);
         }
