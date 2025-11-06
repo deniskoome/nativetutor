@@ -83,6 +83,7 @@
         var sessionStreamType = '{{ $sessionStreamType }}';
         var authUserId = Number({{ $authUserId }});
         var hostUserId = Number({{ $hostUserId }});
+        var rtcUid = '{{ $rtcUid }}';
     </script>
 
 @endpush
