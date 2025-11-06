@@ -387,6 +387,7 @@ class SessionController extends Controller
             $streamRole = 'audience'; // host | audience
             $channelName = "session_$session->id";
             $accountName = "user {$user->id}";
+            $rtcUid = $accountName;
             $userName = $user->full_name;
             $canAccessError = trans('update.you_cannot_enter_this_session');
 
@@ -440,7 +441,7 @@ class SessionController extends Controller
 
                 $isHost = ($streamRole === 'host');
                 $appId = $agoraController->appId;
-                $rtcToken = $agoraController->getRTCToken($channelName, $isHost);
+                $rtcToken = $agoraController->getRTCToken($channelName, $isHost, $rtcUid);
                 $rtmToken = $agoraController->getRTMToken($accountName);
 
 
@@ -458,6 +459,7 @@ class SessionController extends Controller
                     'notStarted' => (!$isHost and empty($agoraHistory)),
                     'streamStartAt' => (!$isHost and !empty($agoraHistory)) ? $agoraHistory->start_at : time(),
                     'authUserId' => $user->id,
+                    'rtcUid' => $rtcUid,
                     'hostUserId' => $session->creator_id,
                     'sessionStreamType' => $session->getSessionStreamType()
                 ];

@@ -30,6 +30,25 @@
 
     var remoteUsers = {};
 
+    function normalizeUid(rawUid) {
+        if (typeof rawUid === 'number') {
+            return rawUid.toString();
+        }
+
+        if (typeof rawUid === 'string') {
+            return rawUid.replace(/^user\s+/i, '').trim();
+        }
+
+        return '';
+    }
+
+    function numericUid(rawUid) {
+        const normalized = normalizeUid(rawUid);
+        const parsed = parseInt(normalized, 10);
+
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
     // Agora client options
     var options = {
         appid: appId,
@@ -60,7 +79,7 @@
                 options.appid,
                 options.channel,
                 options.token || null,
-                authUserId
+                rtcUid || authUserId
             );
 
             if (streamRole === "host" || sessionStreamType === 'multiple') {
@@ -112,13 +131,15 @@
     window.getUserInfoCache = {};
 
     window.getUserInfo = function (uid) {
+        const cacheKey = normalizeUid(uid);
+
         return new Promise((resolve, reject) => {
-            if (getUserInfoCache && typeof getUserInfoCache[uid] !== "undefined") {
-                resolve(getUserInfoCache[uid])
+            if (getUserInfoCache && typeof getUserInfoCache[cacheKey] !== "undefined") {
+                resolve(getUserInfoCache[cacheKey])
             } else {
-                $.get(`/panel/users/${uid}/getInfo`, function (result) {
+                $.get(`/panel/users/${cacheKey}/getInfo`, function (result) {
                     if (result && result.user) {
-                        getUserInfoCache[uid] = result.user;
+                        getUserInfoCache[cacheKey] = result.user;
 
                         resolve(result.user)
                     } else {
@@ -132,19 +153,21 @@
     async function subscribe(user, mediaType) {
 
         const uid = user.uid;
+        const normalizedUid = normalizeUid(uid);
+        const numericId = numericUid(uid);
 
         // subscribe to a remote user
         await client.subscribe(user, mediaType);
         console.log("subscribe success");
         if (mediaType === 'video') {
-            if (uid === hostUserId) {
+            if (numericId !== null && numericId === hostUserId) {
                 user.videoTrack.play("stream-player");
             } else {
-                const playerHtml = await getRemoteUserCardHtml(uid);
+                const playerHtml = await getRemoteUserCardHtml(normalizedUid);
                 const player = $(playerHtml);
 
                 $remoteStreamPlayerEl.append(player);
-                user.videoTrack.play(`remote-player-${uid}`);
+                user.videoTrack.play(`remote-player-${normalizedUid}`);
             }
         }
 
@@ -182,7 +205,7 @@
     }
 
     function handleUserPublished(user, mediaType) {
-        const id = user.uid;
+        const id = normalizeUid(user.uid);
         remoteUsers[id] = user;
 
         subscribe(user, mediaType);
@@ -190,14 +213,14 @@
 
     function handleUserUnpublished(user, mediaType) {
         if (mediaType === 'video') {
-            const id = user.uid;
+            const id = normalizeUid(user.uid);
             delete remoteUsers[id];
             $(`#player-wrapper-${id}`).html('');
         }
     }
 
     function handleHostEndLive(user, mediaType) {
-        const id = user.uid;
+        const id = normalizeUid(user.uid);
 
         $(`#player-wrapper-${id}`).html(liveEndedHtml);
 
@@ -209,7 +232,7 @@
     }
 
     function handleAudienceLeft(user, mediaType) {
-        const id = user.uid;
+        const id = normalizeUid(user.uid);
 
         $(`#remote-player-${id}`).remove();
     }
@@ -381,9 +404,10 @@
     }
 
     async function getRemoteUserCardHtml(uid) {
-        const userInfo = await getUserInfo(uid);
+        const normalizedUid = normalizeUid(uid);
+        const userInfo = await getUserInfo(normalizedUid);
 
-        return `<div id="remote-player-${uid}" class="remote-stream">
+        return `<div id="remote-player-${normalizedUid}" class="remote-stream">
                     <span class="remote-stream-fullscreen">${maximizeIcon}</span>
                     ${userInfo ? `<span class="remote-stream-user-info">${userInfo.full_name}</span>` : ''}
                 </div>`;

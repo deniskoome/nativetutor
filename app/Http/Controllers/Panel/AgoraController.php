@@ -28,7 +28,8 @@ class AgoraController extends Controller
         $accountName = $user->full_name;
         $streamRole = $user->id == 903 ? 'host' : 'audience'; // host | audience
 
-        $rtcToken = $this->getRTCToken($channelName);
+        $rtcUid = "user {$user->id}";
+        $rtcToken = $this->getRTCToken($channelName, $streamRole === 'host', $rtcUid);
         $rtmToken = $this->getRTMToken($accountName);
 
         $data = [
@@ -44,7 +45,7 @@ class AgoraController extends Controller
         return view('web.default.course.agora.index', $data);
     }*/
 
-    public function getRTCToken(string $channelName, bool $isHost): string
+    public function getRTCToken(string $channelName, bool $isHost, string $rtcUid): string
     {
         $role = $isHost ? RtcTokenBuilder::RolePublisher : RtcTokenBuilder::RoleAttendee;
 
@@ -52,15 +53,22 @@ class AgoraController extends Controller
         $currentTimestamp = now()->getTimestamp();
         $privilegeExpiredTs = $currentTimestamp + $expireTimeInSeconds;
 
-        return RtcTokenBuilder::buildTokenWithUserAccount($this->appId, $this->appCertificate, $channelName, null, $role, $privilegeExpiredTs);
+        return RtcTokenBuilder::buildTokenWithUserAccount(
+            $this->appId,
+            $this->appCertificate,
+            $channelName,
+            $rtcUid,
+            $role,
+            $privilegeExpiredTs
+        );
     }
 
-    public function getRTMToken($channelName): string
+    public function getRTMToken(string $accountName): string
     {
         $expireTimeInSeconds = 3600;
         $currentTimestamp = now()->getTimestamp();
         $privilegeExpiredTs = $currentTimestamp + $expireTimeInSeconds;
 
-        return RtmTokenBuilder::buildToken($this->appId, $this->appCertificate, $channelName, null, $privilegeExpiredTs);
+        return RtmTokenBuilder::buildToken($this->appId, $this->appCertificate, $accountName, null, $privilegeExpiredTs);
     }
 }
